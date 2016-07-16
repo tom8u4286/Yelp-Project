@@ -2,3 +2,5 @@ all_reviews.json
 all_menu.json
 reviews/
 backend_reviews/
+w2v/restaurant_all.txt
+w2v/w2v.out
