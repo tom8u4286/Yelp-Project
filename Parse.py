@@ -84,6 +84,14 @@ class Parse:
         #print dishes_ar
         return dishes_ar
 
+    def get_stars(self):
+        restaurant_name = self.get_restaurant_name()
+        dishes_ar = self.get_dishes()
+        for i in xrange(len(dishes_ar)):
+                dishes_ar[i] = dishes_ar[i].lower()
+                dishes_ar[i] = "-".join(dishes_ar[i].split(" ")) + "_" + restaurant_name
+        return stars_string
+
     def set_marked_dishes(self):
         """ match the dishes in the reviews and mark the dish"""
         dishes = self.get_dishes()
@@ -95,7 +103,7 @@ class Parse:
 
     def parse(self):
         """ match the dishes in the reviews with dishes_regex and replace them with the dishes in dishes_ar  """
-        frontend_review_list = list(self.get_restaurant()["reviews"])
+        #frontend_review_list = list(self.get_restaurant()["reviews"])
         backend_review_list = list(self.get_restaurant()["reviews"])
         marked_dishes = self.set_marked_dishes()
 
@@ -105,17 +113,18 @@ class Parse:
         """ tolower before backend parse """
         for i in xrange(len(backend_review_list)):
             #print review
-            frontend_review_list[i]  = frontend_review_list[i].encode("utf-8").lower()
-            backend_review_list[i] = re.sub("(\(|\)|\:|\;|\*|\&|\.|\!|\,|\?|\")", r' \1 ', backend_review_list[i])
-            backend_review_list[i] = re.sub("\\n", r" ", backend_review_list[i])
-            backend_review_list[i]  = backend_review_list[i].encode("utf-8").lower()
+            #frontend_review_list[i]['review']  = frontend_review_list[i].encode("utf-8").lower()
+            backend_review_list[i]['review'] = re.sub("(\(|\)|\:|\;|\*|\&|\.|\!|\,|\?|\")", r' \1 ', backend_review_list[i]['review'])
+            backend_review_list[i]['review'] = re.sub("\\n", r" ", backend_review_list[i]['review'])
+            backend_review_list[i]['review']  = backend_review_list[i]['review'].encode("utf-8").lower()
         #match_count = 0
 
         """ parse """
         for i in xrange(len(frontend_review_list)):
             for dish in xrange(len(dishes_ar)):
-                frontend_review_list[i] = re.sub(dishes_regex[dish], marked_dishes[dish], frontend_review_list[i], flags = re.IGNORECASE)
-                backend_review_list[i] = re.sub(dishes_regex[dish], dishes_ar[dish], backend_review_list[i], flags = re.IGNORECASE)
+                stars = '*'*backend_review_list[i]['stars']
+                #frontend_review_list[i]['review'] = re.sub(dishes_regex[dish], marked_dishes[dish], frontend_review_list[i], flags = re.IGNORECASE)
+                backend_review_list[i]['review'] = re.sub(dishes_regex[dish], stars , backend_review_list[i]['reviews'], flags = re.IGNORECASE)
         """ match backend_review_list with dish_ar count the frequnecy of every dish"""
         dish_count_list = []
         matched_count_for_each_review = [0]*len(backend_review_list)
@@ -123,8 +132,8 @@ class Parse:
             matched_reviews = []
             count = 0
             for i in xrange(0,len(backend_review_list)):
-                count += str(backend_review_list[i]).count(" "+ dish +" ")
-                if dish in backend_review_list[i]:
+                count += str(backend_review_list[i]['review']).count(" "+ dish +" ")
+                if dish in backend_review_list[i]['review']:
                     matched_count_for_each_review[i]+=1
             dish_count_list.append(count)
 #        print dish_count_list
@@ -145,15 +154,15 @@ class Parse:
     def create_dirs(self):
         """ create the directory if not exist"""
         dir1 = os.path.dirname("./backend_reviews/")
-        dir2 = os.path.dirname("./frontend_reviews/")
-        dir3 = os.path.dirname("./restaurant_dic_list/")
+        #dir2 = os.path.dirname("./frontend_reviews/")
+        #dir3 = os.path.dirname("./restaurant_dic_list/")
 
         if not os.path.exists(dir1):
             os.makedirs(dir1)
-        if not os.path.exists(dir2):
-            os.makedirs(dir2)
-        if not os.path.exists(dir3):
-            os.makedirs(dir3)
+        #if not os.path.exists(dir2):
+        #    os.makedirs(dir2)
+        #if not os.path.exists(dir3):
+        #    os.makedirs(dir3)
 
     def render(self):
         """ render frontend_review & backend_reviews & restaurant_list """
@@ -164,34 +173,34 @@ class Parse:
             filename = filename + sys.argv[1][20]
 
         """ 1. render restaurant_*.json in ./frontend_reviews """
-        frontend_json = open("./frontend_reviews/restaurant_%s.json"%(filename), "w+")
-        frontend_json.write(json.dumps(frontend_review_dic_list, indent = 4))
-        frontend_json.close()
+        #frontend_json = open("./frontend_reviews/restaurant_%s.json"%(filename), "w+")
+        #frontend_json.write(json.dumps(frontend_review_dic_list, indent = 4))
+        #frontend_json.close()
 
-        print sys.argv[1], "'s frontend json is done"
+        #print sys.argv[1], "'s frontend json is done"
 
         """ 2. render restaurant_*.json in ./backend_reviews """
         """ tweak backend_reviews"""
         backend_txt = open("./backend_reviews/restaurant_%s.txt"%(filename), "w+")
         for review in backend_review_list:
-            backend_txt.write(review + '\n')
+            backend_txt.write(reviewi['review'] + '\n')
         backend_txt.close()
 
         print sys.argv[1], "'s backend json is done"
 
         """ 3. render restaurant_dictionary, which has to be appended in restaurant_dic_list later in the next program """
-        restaurant_json = open("./restaurant_dic_list/restaurant_dic_%s.json"%(filename), "w+")
+        #restaurant_json = open("./restaurant_dic_list/restaurant_dic_%s.json"%(filename), "w+")
 
-        dish_list = []
-        for i in xrange(len(self.get_dishes())):
-            dish_list.append({"name": self.get_dishes()[i], "vector": NoIndent([0]*200), "name_ar": self.get_dishes_ar()[i].encode("utf-8").lower(), "count": dish_count_list[i], "score":0, "x":0, "y":0})
-        dish_list = sorted(dish_list, key=lambda k: k['count'])
-        dish_list.reverse()
-        restaurant_dic = {"rest_name": self.get_restaurant_name(), "review_count": len(backend_review_list), "dishes_count": len(dish_count_list),"avg_dish_count_in_each_review":avg_diff_dish_count, "dishes": dish_list}
-        restaurant_json.write(json.dumps( restaurant_dic, indent = 4, cls=NoIndentEncoder))
-        restaurant_json.close()
+        #dish_list = []
+        #for i in xrange(len(self.get_dishes())):
+        #    dish_list.append({"name": self.get_dishes()[i], "vector": NoIndent([0]*200), "name_ar": self.get_dishes_ar()[i].encode("utf-8").lower(), "count": dish_count_list[i], "score":0, "x":0, "y":0})
+        #dish_list = sorted(dish_list, key=lambda k: k['count'])
+        #dish_list.reverse()
+        #restaurant_dic = {"rest_name": self.get_restaurant_name(), "review_count": len(backend_review_list), "dishes_count": len(dish_count_list),"avg_dish_count_in_each_review":avg_diff_dish_count, "dishes": dish_list}
+        #restaurant_json.write(json.dumps( restaurant_dic, indent = 4, cls=NoIndentEncoder))
+        #restaurant_json.close()
 
-        print sys.argv[1], "'s restaurant_list json is done"
+        #print sys.argv[1], "'s restaurant_list json is done"
 
 class NoIndent(object):
     def __init__(self, value):
