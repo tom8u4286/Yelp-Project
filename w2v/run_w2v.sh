@@ -1,1 +1,1 @@
-time ./word2vec -train restaurant_all.txt -output w2v.out -cbow 1 -size 200 -window 5 -negative 0 -hs 1 -sample 1e-3 -threads 12 -binary 1 ./distance w2v.out
+time ./word2vec -train restaurant_all.txt -output w2v.out -cbow 0 -size 500 -window 5 -negative 0 -hs 1 -sample 1e-3 -threads 12 -binary 1 ./distance w2v.out
