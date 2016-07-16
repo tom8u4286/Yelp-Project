@@ -120,11 +120,11 @@ class Parse:
         #match_count = 0
 
         """ parse """
-        for i in xrange(len(frontend_review_list)):
+        for i in xrange(len(backend_review_list)):
             for dish in xrange(len(dishes_ar)):
                 stars = '*'*backend_review_list[i]['stars']
                 #frontend_review_list[i]['review'] = re.sub(dishes_regex[dish], marked_dishes[dish], frontend_review_list[i], flags = re.IGNORECASE)
-                backend_review_list[i]['review'] = re.sub(dishes_regex[dish], stars , backend_review_list[i]['reviews'], flags = re.IGNORECASE)
+                backend_review_list[i]['review'] = re.sub(dishes_regex[dish], stars , backend_review_list[i]['review'], flags = re.IGNORECASE)
         """ match backend_review_list with dish_ar count the frequnecy of every dish"""
         dish_count_list = []
         matched_count_for_each_review = [0]*len(backend_review_list)
@@ -142,12 +142,12 @@ class Parse:
 
         """ match every dish in dishes the reviews in frontend_review_list by using every dish in dishes """
         frontend_review_dic_list = []
-        for dish in self.get_dishes():
-            matched_reviews = []
-            for review in frontend_review_list:
-                if dish in review:
-                    matched_reviews.append(review)
-            frontend_review_dic_list.append({"dish_name": dish,"text":matched_reviews})
+        #for dish in self.get_dishes():
+        #    matched_reviews = []
+        #    for review in frontend_review_list:
+        #        if dish in review:
+        #            matched_reviews.append(review)
+        #    frontend_review_dic_list.append({"dish_name": dish,"text":matched_reviews})
 
         return backend_review_list, frontend_review_dic_list,  dish_count_list, avg_diff_dish_count
 
@@ -183,7 +183,7 @@ class Parse:
         """ tweak backend_reviews"""
         backend_txt = open("./backend_reviews/restaurant_%s.txt"%(filename), "w+")
         for review in backend_review_list:
-            backend_txt.write(reviewi['review'] + '\n')
+            backend_txt.write(review['review'] + '\n')
         backend_txt.close()
 
         print sys.argv[1], "'s backend json is done"
